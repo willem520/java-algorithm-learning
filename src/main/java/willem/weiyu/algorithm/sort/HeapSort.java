@@ -7,63 +7,65 @@ import java.util.Arrays;
  * 将其与末尾元素进行交换，此时末尾就为最大值。然后将剩余n-1个元素重新构造成一个堆，
  * 这样会得到n个元素的次小值。如此反复执行，便能得到一个有序序列了。
  */
-public class HeapSort {
+public class HeapSort extends BaseSort {
 
     /**
-     *  时间复杂度：O(nlogn)，n为数组的长度
-     *  空间复杂度：O(1)
-     * @param array
+     * 时间复杂度：O(nlogn)，n 为数组长度
+     * 空间复杂度：O(1)
      */
-    public static void headSort(int[] array) {
-        int length = array.length;
-        for (int i = 0; i < length - 1; i++) {
-            //建堆
-            buildMaxHeap(array, length - i - 1);
-            //交换堆顶和最后一个元素
-            swap(array, 0, length - i - 1);
+    public static void heapSort(int[] nums) {
+        if (nums == null || nums.length < 2) {
+            return;
+        }
+
+        buildMaxHeap(nums);
+
+        // 每一轮把堆顶最大值放到末尾，然后修复剩余区间的大顶堆。
+        for (int heapSize = nums.length; heapSize > 1; heapSize--) {
+            swap(nums, 0, heapSize - 1);
+            siftDown(nums, 0, heapSize - 1);
         }
     }
 
-    private static void buildMaxHeap(int[] array, int lastIndex) {
-        //从lastIndex处节点（最后一个节点）的父节点开始
-        for (int i = lastIndex / 2; i >= 0; i--) {
-            //k保存正在判断的节点
-            int k = i;
-            //如果当前k节点的子节点存在
-            while (2 * k <= lastIndex) {
-                //k节点的左子节点的索引
-                int biggerIndex = 2 * k;
-                //如果biggerIndex小于lastIndex，即biggerIndex+1代表的k节点的右子节点存在
-                if (biggerIndex < lastIndex) {
-                    //若果右子节点的值较大
-                    if (array[biggerIndex] < array[biggerIndex + 1]) {
-                        //biggerIndex总是记录较大子节点的索引
-                        biggerIndex++;
-                    }
-                }
-                //如果k节点的值小于其较大的子节点的值
-                if (array[k] < array[biggerIndex]) {
-                    //交换他们
-                    swap(array, k, biggerIndex);
-                    //将biggerIndex赋予k，开始while循环的下一次循环，重新保证k节点的值大于其左右子节点的值
-                    k = biggerIndex;
-                } else {
-                    break;
-                }
+    /**
+     * 从最后一个非叶子节点开始下沉，构建初始大顶堆。
+     */
+    private static void buildMaxHeap(int[] nums) {
+        for (int i = nums.length / 2 - 1; i >= 0; i--) {
+            siftDown(nums, i, nums.length);
+        }
+    }
+
+    /**
+     * 让 root 节点在 [0, heapSize) 内下沉到正确位置，维持大顶堆性质。
+     */
+    private static void siftDown(int[] nums, int root, int heapSize) {
+        int current = root;
+        while (true) {
+            int left = 2 * current + 1;
+            int right = left + 1;
+            int largest = current;
+
+            if (left < heapSize && nums[left] > nums[largest]) {
+                largest = left;
             }
-        }
-    }
+            if (right < heapSize && nums[right] > nums[largest]) {
+                largest = right;
+            }
 
-    private static void swap(int[] array, int first, int last) {
-        array[first] = array[first] ^ array[last];
-        array[last] = array[first] ^ array[last];
-        array[first] = array[first] ^ array[last];
+            if (largest == current) {
+                return;
+            }
+
+            swap(nums, current, largest);
+            current = largest;
+        }
     }
 
     public static void main(String[] args) {
         int[] array = new int[]{20, 7, 28, 32, 1, 9, 5, 2};
         System.out.println("堆排序前=>" + Arrays.toString(array));
-        headSort(array);
+        heapSort(array);
         System.out.println("堆排序后=>" + Arrays.toString(array));
     }
 }
